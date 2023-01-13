@@ -125,7 +125,7 @@ class Graph:
             raise TypeError(f"'{obj}' is not a vertex or an edge")
         if self.__check_vertex(obj):
             return True
-        if self.__check_edge(obj):
+        elif self.__check_edge(obj):
             return True
         return False
 
@@ -217,10 +217,11 @@ class Graph:
         return len(self.edges)
 
     def adjacency_matrix(self):
-        if not self.directed:
-            return self.__undirected_adj_matrix()
-        else:
-            return self.__directed_adj_matrix()
+        return (
+            self.__directed_adj_matrix()
+            if self.directed
+            else self.__undirected_adj_matrix()
+        )
 
     @undirected
     def __undirected_adj_matrix(self):
@@ -243,10 +244,11 @@ class Graph:
         return adj_matrix
 
     def adjacency_list(self):
-        if not self.directed:
-            return self.__undirected_adj_list()
-        else:
-            return self.__directed_adj_list()
+        return (
+            self.__directed_adj_list()
+            if self.directed
+            else self.__undirected_adj_list()
+        )
 
     @undirected
     def __undirected_adj_list(self):
@@ -432,7 +434,35 @@ class Graph:
     @undirected
     def bfs_shortest_path(self, source, target=None):  # TODO
         if self.has_loops():
-            ValueError(f"Graph can't have loops")
+            ValueError("Graph can't have loops")
+
+    @weighted
+    @undirected
+    def dijkstra(self, source):
+        self.__check_vertex(source)
+        dist = {vertex: float("inf") for vertex in self.vertices}
+        prev = {vertex: None for vertex in self.vertices}
+        unvisited = set(self.vertices)
+        visited = set()
+        dist[source] = 0
+
+        while unvisited:
+            min_weight = {
+                vertex: dist[vertex] for vertex in unvisited if vertex not in visited
+            }
+            source = min(min_weight, key=min_weight.get)
+            unvisited.remove(source)
+            for v in self.adjacent_vertices(source):
+                if v not in unvisited:
+                    continue
+                for e in self.edges:
+                    if set(e.vertices) == {source, v}:
+                        alt = e.weight + dist[source]
+                        if alt < dist[v]:
+                            dist[v] = alt
+                            prev[v] = source
+            visited.add(source)
+        return dist
 
 
 # ==========================================================================================
@@ -463,25 +493,25 @@ def graph_from_matrix(matrix, directed=False, weighted=False, name=None):
     edges = []
     if not directed:
         for i in range(len(matrix)):
-            for j in range(i):
-                if matrix[i][j] != 0:
-                    edges.append(
-                        Edge(
-                            vertices[i],
-                            vertices[j],
-                            weight=matrix[i][j] if weighted else None,
-                        )
-                    )
+            edges.extend(
+                Edge(
+                    vertices[i],
+                    vertices[j],
+                    weight=matrix[i][j] if weighted else None,
+                )
+                for j in range(i)
+                if matrix[i][j] != 0
+            )
         return Graph(vertices, edges, weighted=weighted, name=name)
     else:
         for i in range(len(matrix)):
-            for j in range(len(matrix)):
-                if matrix[i][j] != 0:
-                    edges.append(
-                        Edge(
-                            vertices[i],
-                            vertices[j],
-                            weight=matrix[i][j] if weighted else None,
-                        )
-                    )
+            edges.extend(
+                Edge(
+                    vertices[i],
+                    vertices[j],
+                    weight=matrix[i][j] if weighted else None,
+                )
+                for j in range(len(matrix))
+                if matrix[i][j] != 0
+            )
         return Graph(vertices, edges, directed=directed, weighted=weighted, name=name)
