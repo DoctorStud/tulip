@@ -1,5 +1,5 @@
 from tulip import Edge, Graph, Vertex
-from tulip import generate_vertex_names, graph_from_matrix
+from generators import generate_vertices, graph_from_matrix
 
 A = Vertex("A")
 B = Vertex("B")
@@ -43,14 +43,14 @@ Konigsberg_bridges = Graph(
 
 class Star_Graph(Graph):
     def __init__(self, n):
-        vertices = [Vertex(i) for i in generate_vertex_names(n + 1)]
+        vertices = generate_vertices(n + 1)
         edges = [Edge(vertices[0], Vertex(i)) for i in vertices if i is not vertices[0]]
         super().__init__(vertices, edges, name=f"S_{n}")
 
 
 class Wheel_Graph(Graph):
     def __init__(self, n):
-        vertices = [Vertex(i) for i in generate_vertex_names(n)]
+        vertices = generate_vertices(n)
         edges = [Edge(vertices[0], Vertex(i)) for i in vertices if i is not vertices[0]]
         edges.extend([Edge(vertices[i], vertices[i + 1]) for i in range(1, n - 1)])
         edges.append(Edge(vertices[1], vertices[n - 1]))
@@ -59,7 +59,7 @@ class Wheel_Graph(Graph):
 
 class Cycle_Graph(Graph):
     def __init__(self, n):
-        vertices = [Vertex(i) for i in generate_vertex_names(n)]
+        vertices = generate_vertices(n)
         edges = [Edge(vertices[i], vertices[i + 1]) for i in range(n - 1)]
         edges.append(Edge(vertices[0], vertices[n - 1]))
         super().__init__(vertices, edges, name=f"C_{n}")
@@ -67,7 +67,7 @@ class Cycle_Graph(Graph):
 
 class Complete_Graph(Graph):
     def __init__(self, n):
-        vertices = [Vertex(i) for i in generate_vertex_names(n)]
+        vertices = generate_vertices(n)
         edges = []
         for i in vertices:
             for j in vertices:
@@ -78,6 +78,19 @@ class Complete_Graph(Graph):
 
 class Complete_Bipartite_Graph(Graph):
     def __init__(self, n, m):
-        vertices = [Vertex(i) for i in generate_vertex_names(n + m)]
+        vertices = generate_vertices(n + m)
         edges = [Edge(vertices[i], vertices[j]) for i in range(n) for j in range(m)]
         super().__init__(vertices, edges, name=f"K_{n},{m}")
+
+
+class Path_Graph(Graph):
+    def __init__(self, n):
+        vertices = generate_vertices(n)
+        edges = [Edge(vertices[i], vertices[i + 1]) for i in range(n - 1)]
+        super().__init__(vertices, edges, name="P_{n}")
+
+
+class Empty_Graph(Graph):
+    def __init__(self, n):
+        vertices = generate_vertices(n)
+        super().__init__(vertices)
