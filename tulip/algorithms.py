@@ -1,4 +1,5 @@
 from tulip import *
+from itertools import combinations
 
 
 def check_graph_is_directed(graph):
@@ -56,11 +57,6 @@ def breadth_first_search(graph, vertex=None):
     return visited
 
 
-def bfs_shortest_path(graph, source, target=None):  # TODO
-    if graph.has_loops():
-        ValueError("Graph can't have loops")
-
-
 def shortest_path(graph, source, target, algorithm=None):
     if algorithm == "dijkstra":
         return __dijkstra_shortest_path(graph, source, target)
@@ -68,6 +64,7 @@ def shortest_path(graph, source, target, algorithm=None):
 
 def __dijkstra_shortest_path(graph, source, target):
     check_graph_is_weighted(graph)
+    check_graph_is_undirected(graph)
     graph.check_vertex(source)
     graph.check_vertex(target)
     for edge in graph.edges:
@@ -105,3 +102,36 @@ def __dijkstra_shortest_path(graph, source, target):
                     min_vertex = prev[min_vertex]
             break
     return path[::-1]
+
+
+def find_maximal_cliques(graph):
+    check_graph_is_undirected(graph)
+    cliques = []
+    vertices = set(graph.vertices)
+    __bron_kerbosch(set(), vertices, set(), graph, cliques)
+    return cliques
+
+
+def __bron_kerbosch(R, P, X, graph, cliques):
+    if not P and not X:
+        if len(R) > 1:
+            cliques.append(R)
+        return
+    pivot = max(P.union(X), key=lambda v: len(graph.adjacent_vertices(v)))
+
+    for v in P.difference(graph.adjacent_vertices(pivot)):
+        neighbors = graph.adjacent_vertices(v)
+        __bron_kerbosch(
+            R.union({v}),
+            P.intersection(neighbors),
+            X.intersection(neighbors),
+            graph,
+            cliques,
+        )
+        P.remove(v)
+        X.add(v)
+
+
+def find_eulerian_cycle(graph):
+    # Hierholzer's algorithm
+    pass
