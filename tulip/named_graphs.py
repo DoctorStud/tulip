@@ -79,7 +79,10 @@ class Complete_Graph(Graph):
 class Complete_Bipartite_Graph(Graph):
     def __init__(self, n, m):
         vertices = generate_vertices(n + m)
-        edges = [Edge(vertices[i], vertices[j]) for i in range(n) for j in range(m)]
+        print(vertices)
+        edges = [
+            Edge(vertices[i], vertices[j]) for i in range(n) for j in range(n, n + m)
+        ]
         super().__init__(vertices, edges, name=f"K_{n},{m}")
 
 
