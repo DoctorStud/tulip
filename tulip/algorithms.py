@@ -1,5 +1,5 @@
 from tulip import *
-from itertools import combinations
+from copy import deepcopy
 
 
 def check_graph_is_directed(graph):
@@ -132,6 +132,38 @@ def __bron_kerbosch(R, P, X, graph, cliques):
         X.add(v)
 
 
-def find_eulerian_cycle(graph):
-    # Hierholzer's algorithm
-    pass
+def find_eulerian_circuit(graph, start=None):
+    check_graph_is_undirected(graph)
+    if start is None:
+        start = graph.vertices[0]
+    else:
+        graph.check_vertex(start)
+    if not graph.has_eulerian_circuit():
+        raise TypeError("Graph must hava an eulerian circuit")
+    return __hierholzer_algorithm(graph, start)
+
+
+def __hierholzer_algorithm(graph, start):
+    adj_list = deepcopy(graph.adjacency_list())
+
+    def find_circuit(start=None):
+        next_vertex = adj_list[start].pop()
+        adj_list[next_vertex].remove(start)
+        candidate_circuit = [start, next_vertex]
+        while next_vertex != start:
+            current_vertex = next_vertex
+            next_vertex = adj_list[current_vertex].pop()
+            adj_list[next_vertex].remove(current_vertex)
+            candidate_circuit.append(next_vertex)
+        return candidate_circuit
+
+    circuit = find_circuit(start)
+
+    for i, v in enumerate(graph.vertices):
+        if len(adj_list[v]) != 0:
+            v_circuit = find_circuit(v)
+            for j, u in enumerate(reversed(v_circuit)):
+                if j == len(v_circuit) - 1:
+                    continue
+                circuit.insert(i + 1, u)
+    return circuit
