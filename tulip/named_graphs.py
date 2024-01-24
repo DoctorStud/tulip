@@ -1,4 +1,4 @@
-from tulip import Edge, Graph, Vertex
+from tulip import *
 from generators import generate_vertices, graph_from_matrix
 
 A = Vertex("A")
@@ -68,18 +68,13 @@ class Cycle_Graph(Graph):
 class Complete_Graph(Graph):
     def __init__(self, n):
         vertices = generate_vertices(n)
-        edges = []
-        for i in vertices:
-            for j in vertices:
-                if i != j and (e := Edge(i, j)) not in edges:
-                    edges.append(e)
+        edges = list({Edge(i, j) for i in vertices for j in vertices if i != j})
         super().__init__(vertices, edges, name=f"K_{n}")
 
 
 class Complete_Bipartite_Graph(Graph):
     def __init__(self, n, m):
         vertices = generate_vertices(n + m)
-        print(vertices)
         edges = [
             Edge(vertices[i], vertices[j]) for i in range(n) for j in range(n, n + m)
         ]
